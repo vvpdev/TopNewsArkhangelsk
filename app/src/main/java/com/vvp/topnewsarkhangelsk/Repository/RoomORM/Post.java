@@ -1,4 +1,4 @@
-package com.vvp.topnewsarkhangelsk.Model.RoomORM;
+package com.vvp.topnewsarkhangelsk.Repository.RoomORM;
 
 
     // элемент для хранения в БД

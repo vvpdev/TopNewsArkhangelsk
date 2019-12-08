@@ -1,7 +1,5 @@
 package com.vvp.topnewsarkhangelsk.Activities;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.os.Bundle;
 
 import com.arellomobile.mvp.MvpAppCompatActivity;
@@ -36,7 +34,7 @@ public class PostsActivity extends MvpAppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_posts);
+        setContentView(R.layout.posts_activity);
 
 
 

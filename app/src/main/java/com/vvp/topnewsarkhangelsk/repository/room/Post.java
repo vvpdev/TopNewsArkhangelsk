@@ -11,26 +11,21 @@ public class Post implements Serializable {
 
     int idPost;             // id поста
 
-    int idCommunity;        // id сообщества/паблика
+    String titlePublic;     // заголовок паблика
 
     String textPost;        // текст поста
-
-    //String picture;         // url пикчи
 
     int quantityLikes;      // количество лайков
 
     int quantityComments;   // количество коментов
 
-    //String link;            //ссылка на оригинал поста
-
 
 
     // конструктор
-    public Post(int idPost, int idCommunity,  String textPost,  int quantityLikes, int quantityComments) {
+    public Post(int idPost, String titlePublic, String textPost,  int quantityLikes, int quantityComments) {
         this.idPost = idPost;
-        this.idCommunity = idCommunity;
+        this.titlePublic = titlePublic;
         this.textPost = textPost;
-       // this.picture = picture;
         this.quantityLikes = quantityLikes;
         this.quantityComments = quantityComments;
     }
@@ -40,8 +35,8 @@ public class Post implements Serializable {
         return idPost;
     }
 
-    public int getIdCommunity() {
-        return idCommunity;
+    public String getTitlePublic() {
+        return titlePublic;
     }
 
     public String getTextPost() {
@@ -56,9 +51,6 @@ public class Post implements Serializable {
         return quantityComments;
     }
 
-//    public String getPicture() {
-//        return picture;
-//    }
 
 
 

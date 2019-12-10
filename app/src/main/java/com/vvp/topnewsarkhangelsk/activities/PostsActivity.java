@@ -1,7 +1,10 @@
 package com.vvp.topnewsarkhangelsk.activities;
 
 import android.os.Bundle;
+import android.view.View;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -23,7 +26,7 @@ import com.vvp.topnewsarkhangelsk.presenters.PostsPresenter;
         // вывод в шторке
         // Retrofit
         // сортировка по текущей дате
-
+        // прогресс бар загрузки
 
 
 
@@ -36,15 +39,15 @@ public class PostsActivity extends MvpAppCompatActivity implements PostInterface
     @InjectPresenter
     PostsPresenter presenter;
 
-
     //UI
     RecyclerView recyclerViewArkhLife;
     RecyclerView.LayoutManager layoutManager;
+    ProgressBar progressLoad;
 
 
-    // для уведомления об ошибках
+    // для уведомлений
     Snackbar snackbarMessage;
-
+    TextView textError;
 
 
 
@@ -54,9 +57,10 @@ public class PostsActivity extends MvpAppCompatActivity implements PostInterface
         setContentView(R.layout.posts_activity);
 
         recyclerViewArkhLife = findViewById(R.id.recyclerViewArkhLife);
+        textError = findViewById(R.id.textError);
+        progressLoad = findViewById(R.id.progressLoad);
 
     }
-
 
 
 
@@ -67,22 +71,42 @@ public class PostsActivity extends MvpAppCompatActivity implements PostInterface
         snackbarMessage = Snackbar.make(recyclerViewArkhLife, message, Snackbar.LENGTH_LONG)
                                 .setAction("Action", null);
         snackbarMessage.show();
-
     }
 
 
-
-
-    // настройка новостей из Архангельск Life
+    // ошибка - пустой массив (еще нет постов за текущий день)
     @Override
-    public void initRecycclerViewArkhLife() {
+    public void showEmpryArrayError(String message) {
 
-        // горизонтальный RecyclerView                  // строки
-        layoutManager = new StaggeredGridLayoutManager(1, LinearLayout.HORIZONTAL);
+        textError.setVisibility(View.VISIBLE);
+        textError.setText(message);
+    }
+
+
+    // оборажение постов в RecyclerView
+    @Override
+    public void initRecycclerView() {
+
+        textError.setVisibility(View.GONE);
+
+        layoutManager = new LinearLayoutManager(this);
         recyclerViewArkhLife.setLayoutManager(layoutManager);
 
-        RecyclerViewPostsAdapter adapter = new RecyclerViewPostsAdapter(PostsPresenter.getArrayArkhLifePosts(), this);
+        RecyclerViewPostsAdapter adapter = new RecyclerViewPostsAdapter(PostsPresenter.getArrayPosts(), this);
         recyclerViewArkhLife.setAdapter(adapter);
     }
 
+
+    // прогресс бар
+    @Override
+    public void showProgressDialog(Boolean show) {
+
+        if (show){
+            progressLoad.setVisibility(View.VISIBLE);
+        }
+        else {
+            progressLoad.setVisibility(View.GONE);
+        }
+
+    }
 }

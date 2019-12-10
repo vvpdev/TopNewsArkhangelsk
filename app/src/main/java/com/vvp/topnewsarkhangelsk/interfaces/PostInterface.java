@@ -10,8 +10,13 @@ public interface PostInterface extends MvpView {
     // вывод сообщений через SnackBar
     void showMessage(String message);
 
+    // если еще нет постов - пустой массив
+    void showEmpryArrayError(String message);
 
-    //recyclerView для Архангельск Life
-    void initRecycclerViewArkhLife();
+    //recyclerView
+    void initRecycclerView();
+
+    // прогресс загрузки
+    void showProgressDialog(Boolean show);
 
 }

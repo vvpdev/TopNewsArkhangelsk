@@ -50,6 +50,8 @@ public class RecyclerViewPostsAdapter extends RecyclerView.Adapter <RecyclerView
 
         Post post = arrayPosts.get(position);
 
+
+        holder.textTitlePublic.setText(post.getTitlePublic());
         holder.textPost.setText(post.getTextPost());
 
 //        Glide

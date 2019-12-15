@@ -1,12 +1,12 @@
 package com.vvp.topnewsarkhangelsk.presenters;
 
-
 import com.arellomobile.mvp.InjectViewState;
 import com.arellomobile.mvp.MvpPresenter;
-import com.vvp.topnewsarkhangelsk.interfaces.PostInterface;
+import com.vvp.topnewsarkhangelsk.interfaces.RecViewPostsInterface;
 import com.vvp.topnewsarkhangelsk.repository.retrofit.RetrofitBuilder;
 import com.vvp.topnewsarkhangelsk.repository.retrofit.pojo.POJO;
 import com.vvp.topnewsarkhangelsk.repository.room.Post;
+import com.vvp.topnewsarkhangelsk.utils.CheckConnection;
 import com.vvp.topnewsarkhangelsk.utils.SettingTime;
 
 import java.util.ArrayList;
@@ -18,24 +18,44 @@ import retrofit2.Response;
 
 
 @InjectViewState
-public class PostsPresenter extends MvpPresenter <PostInterface> {
+public class RecViewPostPresenter extends MvpPresenter <RecViewPostsInterface> {
+
 
     // массив для постов
-    static ArrayList <Post> arrayPosts = new ArrayList<>();
+    private static ArrayList<Post> arrayPosts = new ArrayList<>();
 
 
-    //конструктор
-    public PostsPresenter() {
+    // очистка
+    public static void clearArray(){
+        arrayPosts.clear();
+    }
 
-        loadData1();
+
+    // конструктор
+    public RecViewPostPresenter() {
+
+        clearArray();
+
+        if (CheckConnection.isNetworkAvaliable()){
+
+            getViewState().showErrorOnTextView(false, "");  // скрываем TextView для ошибок
+            getViewState().showProgressDialog(true);    // включаем показ прогресса
+
+            // загрузка из первого паблика цепляет дальнейшую загрузку из других
+            loadData1();
+        }
+
+        else {
+
+            getViewState().showProgressDialog(false);   // скрываем прогресс
+            getViewState().showMessage("проверьте подключение к сети");
+            getViewState().showErrorOnTextView(true, "нет интернета");
+        }
     }
 
 
     // Архангельск Life
-    void loadData1(){
-
-        // показать ПрогрессБар
-        getViewState().showProgressDialog(true);
+    public  void loadData1(){
 
         Runnable runnable = () -> RetrofitBuilder.getInstance()
                 .getRESTMethods()
@@ -72,7 +92,6 @@ public class PostsPresenter extends MvpPresenter <PostInterface> {
                     @Override
                     public void onFailure(Call<POJO> call, Throwable t) {
 
-                        getViewState().showMessage("не удалось загрузить");
                     }
                 });
 
@@ -81,9 +100,8 @@ public class PostsPresenter extends MvpPresenter <PostInterface> {
     }
 
 
-
     // Подслушано Архангельск
-    void loadData2(){
+    private void loadData2(){
 
         Runnable runnable = () -> RetrofitBuilder.getInstance()
                 .getRESTMethods()
@@ -100,7 +118,7 @@ public class PostsPresenter extends MvpPresenter <PostInterface> {
                             // время публикации поста
                             long checkDate = pojo.getResponse().getItems().get(i).getDate();
 
-//                            // в диапазоне текущего дня
+                            // в диапазоне текущего дня
                             if ((checkDate > SettingTime.getFirstUnixTime()) & (checkDate < SettingTime.getSecondUnixTime())) {
 
                                 arrayPosts.add(new Post(
@@ -112,14 +130,13 @@ public class PostsPresenter extends MvpPresenter <PostInterface> {
                                 ));
                             }
                         }
-                        // второй паблик
+
                         loadData3();
                     }
 
                     @Override
                     public void onFailure(Call<POJO> call, Throwable t) {
 
-                        getViewState().showMessage("не удалось загрузить");
                     }
                 });
 
@@ -128,10 +145,8 @@ public class PostsPresenter extends MvpPresenter <PostInterface> {
     }
 
 
-
-
     // 29.ru - новости Архангельска
-    void loadData3(){
+    private void loadData3(){
 
         Runnable runnable = () -> RetrofitBuilder.getInstance()
                 .getRESTMethods()
@@ -148,7 +163,7 @@ public class PostsPresenter extends MvpPresenter <PostInterface> {
                             // время публикации поста
                             long checkDate = pojo.getResponse().getItems().get(i).getDate();
 
-//                            // в диапазоне текущего дня
+                            // в диапазоне текущего дня
                             if ((checkDate > SettingTime.getFirstUnixTime()) & (checkDate < SettingTime.getSecondUnixTime())) {
 
                                 arrayPosts.add(new Post(
@@ -167,7 +182,6 @@ public class PostsPresenter extends MvpPresenter <PostInterface> {
                     @Override
                     public void onFailure(Call<POJO> call, Throwable t) {
 
-                        getViewState().showMessage("не удалось загрузить");
                     }
                 });
 
@@ -176,9 +190,8 @@ public class PostsPresenter extends MvpPresenter <PostInterface> {
     }
 
 
-
     // Жесть Архангельска
-    void loadData4(){
+    private void loadData4(){
 
         Runnable runnable = () -> RetrofitBuilder.getInstance()
                 .getRESTMethods()
@@ -195,7 +208,7 @@ public class PostsPresenter extends MvpPresenter <PostInterface> {
                             // время публикации поста
                             long checkDate = pojo.getResponse().getItems().get(i).getDate();
 
-//                            // в диапазоне текущего дня
+                            // в диапазоне текущего дня
                             if ((checkDate > SettingTime.getFirstUnixTime()) & (checkDate < SettingTime.getSecondUnixTime())) {
 
                                 arrayPosts.add(new Post(
@@ -214,7 +227,6 @@ public class PostsPresenter extends MvpPresenter <PostInterface> {
                     @Override
                     public void onFailure(Call<POJO> call, Throwable t) {
 
-                        getViewState().showMessage("не удалось загрузить");
                     }
                 });
 
@@ -223,10 +235,8 @@ public class PostsPresenter extends MvpPresenter <PostInterface> {
     }
 
 
-
-
     // Жесть Архангельска №2
-    void loadData5(){
+    public void loadData5(){
 
         Runnable runnable = () -> RetrofitBuilder.getInstance()
                 .getRESTMethods()
@@ -243,7 +253,7 @@ public class PostsPresenter extends MvpPresenter <PostInterface> {
                             // время публикации поста
                             long checkDate = pojo.getResponse().getItems().get(i).getDate();
 
-//                            // в диапазоне текущего дня
+                            // в диапазоне текущего дня
                             if ((checkDate > SettingTime.getFirstUnixTime()) & (checkDate < SettingTime.getSecondUnixTime())) {
 
                                 arrayPosts.add(new Post(
@@ -257,27 +267,17 @@ public class PostsPresenter extends MvpPresenter <PostInterface> {
                         }
 
 
-                        // если вообще нет постов
-                        if (arrayPosts.isEmpty()){
-                            getViewState().showEmpryArrayError("еще нет постов");
-                        }
-                        else {
+                        // сортировка по лайкам
+                        Collections.sort(arrayPosts, Post.sortByLikes);
 
-                            // сортировка по лайкам
-                            Collections.sort(arrayPosts, Post.sortByLikes);
 
-                            // скрыть прогресс бар
-                            getViewState().showProgressDialog(false);
-
-                            //init RecyclerView
-                            getViewState().initRecycclerView();
-                        }
+                        getViewState().showProgressDialog(false);
+                        getViewState().initRecycclerView();
                     }
 
                     @Override
                     public void onFailure(Call<POJO> call, Throwable t) {
 
-                        getViewState().showMessage("не удалось загрузить");
                     }
                 });
 
@@ -287,16 +287,13 @@ public class PostsPresenter extends MvpPresenter <PostInterface> {
 
 
 
-
-
     public static ArrayList<Post> getArrayPosts() {
         return arrayPosts;
     }
 
 
-
     // вернуть заголовок паблика
-    String setTitlePublic(int idPublic){
+    public String setTitlePublic(int idPublic){
 
         String title = "";
 
@@ -325,8 +322,5 @@ public class PostsPresenter extends MvpPresenter <PostInterface> {
 
         return title;
     }
-
-
-
 
 }

@@ -1,6 +1,15 @@
 <resources>
-    <string name="app_name">VK News Arkh</string>
+    <string name="app_name">Топ Новости Архангельск</string>
+    <string name="settingAction">настройки</string>
+    <string name="aboutAppText">о приложении</string>
 
+
+    <string name="navigation_drawer_open">открыто</string>
+    <string name="navigation_drawer_close">закрыто</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="main_fragment">посты</string>
 
 
 </resources>

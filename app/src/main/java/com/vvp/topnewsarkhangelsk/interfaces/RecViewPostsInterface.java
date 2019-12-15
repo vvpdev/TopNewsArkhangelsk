@@ -1,17 +1,14 @@
 package com.vvp.topnewsarkhangelsk.interfaces;
 
-import android.view.View;
-
 import com.arellomobile.mvp.MvpView;
 
-public interface PostInterface extends MvpView {
-
+public interface RecViewPostsInterface extends MvpView {
 
     // вывод сообщений через SnackBar
     void showMessage(String message);
 
-    // если еще нет постов - пустой массив
-    void showEmpryArrayError(String message);
+     //если еще нет постов - пустой массив
+    void showErrorOnTextView(boolean show, String message);
 
     //recyclerView
     void initRecycclerView();

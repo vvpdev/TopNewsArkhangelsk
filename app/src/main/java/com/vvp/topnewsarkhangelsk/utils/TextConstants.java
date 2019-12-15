@@ -8,6 +8,7 @@ public class TextConstants {
 
         //Log
         public static final String TAG = "my_teg";
+        public static final String INET = "inet";
 
 
 

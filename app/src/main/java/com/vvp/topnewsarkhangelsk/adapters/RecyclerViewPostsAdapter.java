@@ -54,10 +54,10 @@ public class RecyclerViewPostsAdapter extends RecyclerView.Adapter <RecyclerView
         holder.textTitlePublic.setText(post.getTitlePublic());
         holder.textPost.setText(post.getTextPost());
 
-//        Glide
-//                .with(ContextApp.getInstance())
-//                .load(post.getPicture())
-//                .into(holder.imagePost);
+        Glide
+                .with(ContextApp.getInstance())
+                .load(post.getPicture())
+                .into(holder.imagePost);
 
         holder.textQuantityLikes.setText(String.valueOf(post.getQuantityLikes()));
         holder.textQuantityComments.setText(String.valueOf(post.getQuantityComments()));

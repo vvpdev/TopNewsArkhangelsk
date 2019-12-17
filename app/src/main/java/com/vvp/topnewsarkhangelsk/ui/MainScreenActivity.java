@@ -75,11 +75,7 @@ public class MainScreenActivity extends MvpAppCompatActivity implements MainScre
         //для шторки
         drawerLayout = findViewById(R.id.drawerLayout);
         navigationViewPosts = findViewById(R.id.navigationViewPosts);
-
     }
-
-
-
 
 
 

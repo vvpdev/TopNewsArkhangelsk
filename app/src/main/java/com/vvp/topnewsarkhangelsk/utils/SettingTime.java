@@ -28,8 +28,6 @@ public class SettingTime {
     }
 
 
-
-
     //конечное время
     public static long getSecondUnixTime(){
 

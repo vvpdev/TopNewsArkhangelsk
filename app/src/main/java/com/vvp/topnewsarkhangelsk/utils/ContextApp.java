@@ -3,11 +3,6 @@ package com.vvp.topnewsarkhangelsk.utils;
 import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
-import android.renderscript.Sampler;
-
-import java.util.Objects;
 
 
 // глобальный Context для работы с Room

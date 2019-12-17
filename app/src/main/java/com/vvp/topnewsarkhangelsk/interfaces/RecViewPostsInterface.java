@@ -16,4 +16,8 @@ public interface RecViewPostsInterface extends MvpView {
     // прогресс загрузки
     void showProgressDialog(Boolean show);
 
+    // проверка сети
+    void checkConnection();
+
+
 }

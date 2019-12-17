@@ -1,13 +1,15 @@
 package com.vvp.topnewsarkhangelsk.presenters;
 
+import android.util.Log;
+
 import com.arellomobile.mvp.InjectViewState;
 import com.arellomobile.mvp.MvpPresenter;
 import com.vvp.topnewsarkhangelsk.interfaces.RecViewPostsInterface;
 import com.vvp.topnewsarkhangelsk.repository.retrofit.RetrofitBuilder;
 import com.vvp.topnewsarkhangelsk.repository.retrofit.pojo.POJO;
 import com.vvp.topnewsarkhangelsk.repository.room.Post;
-import com.vvp.topnewsarkhangelsk.utils.CheckConnection;
 import com.vvp.topnewsarkhangelsk.utils.SettingTime;
+import com.vvp.topnewsarkhangelsk.utils.TextConstants;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -22,40 +24,56 @@ public class RecViewPostPresenter extends MvpPresenter <RecViewPostsInterface> {
 
 
     // массив для постов
-    private static ArrayList<Post> arrayPosts = new ArrayList<>();
-
-
-    // очистка
-    public static void clearArray(){
-        arrayPosts.clear();
-    }
+    private ArrayList<Post> arrayPosts = new ArrayList<>();
 
 
     // конструктор
     public RecViewPostPresenter() {
 
-        clearArray();
+        getViewState().checkConnection();
+    }
 
-        if (CheckConnection.isNetworkAvaliable()){
 
-            getViewState().showErrorOnTextView(false, "");  // скрываем TextView для ошибок
-            getViewState().showProgressDialog(true);    // включаем показ прогресса
+    public void loadData(boolean connection){
 
-            // загрузка из первого паблика цепляет дальнейшую загрузку из других
-            loadData1();
+        if (connection){
+
+            if (arrayPosts.isEmpty()){
+
+                getViewState().showErrorOnTextView(false, ""); // скрываем TextView для ошибок
+                getViewState().showProgressDialog(true);    // включаем показ прогресса
+
+                // загрузка из первого паблика цепляет дальнейшую загрузку из других
+                loadData1();
+            }
+
+            else {
+                getViewState().initRecycclerView();
+            }
         }
 
         else {
 
-            getViewState().showProgressDialog(false);   // скрываем прогресс
-            getViewState().showMessage("проверьте подключение к сети");
-            getViewState().showErrorOnTextView(true, "нет интернета");
+            if (arrayPosts.isEmpty()){
+
+                getViewState().showErrorOnTextView(true, "Нет доступа к сети. Невозможно загрузить данные.");
+                getViewState().showMessage("отсутствует подключение к сети");
+            }
+
+            else {
+                getViewState().showErrorOnTextView(false, ""); // скрываем TextView для ошибок
+                getViewState().showMessage("отсутствует подключение к сети");
+                getViewState().initRecycclerView();
+            }
         }
     }
 
 
+
+
+
     // Архангельск Life
-    public  void loadData1(){
+    private void loadData1(){
 
         Runnable runnable = () -> RetrofitBuilder.getInstance()
                 .getRESTMethods()
@@ -72,16 +90,40 @@ public class RecViewPostPresenter extends MvpPresenter <RecViewPostsInterface> {
                             // время публикации поста
                             long checkDate = pojo.getResponse().getItems().get(i).getDate();
 
-//                            // в диапазоне текущего дня
+                           // в диапазоне текущего дня
                             if ((checkDate > SettingTime.getFirstUnixTime()) & (checkDate < SettingTime.getSecondUnixTime())) {
 
-                                arrayPosts.add(new Post(
-                                        pojo.getResponse().getItems().get(i).getId(),
-                                        setTitlePublic(pojo.getResponse().getItems().get(i).getOwnerId()),
-                                        pojo.getResponse().getItems().get(i).getText(),
-                                        pojo.getResponse().getItems().get(i).getLikes().getCount(),
-                                        pojo.getResponse().getItems().get(i).getComments().getCount()
-                                ));
+
+                                if (pojo.getResponse().getItems().get(i).getAttachments() != null){
+
+                                    if (pojo.getResponse().getItems().get(i).getAttachments().get(0).getPhoto() != null ){
+
+                                        if (pojo.getResponse().getItems().get(i).getAttachments().get(0).getPhoto().getSizes() != null){
+
+                                            if (pojo.getResponse().getItems().get(i).getAttachments().get(0).getPhoto().getSizes().get(3) != null){
+
+                                                arrayPosts.add(new Post(
+                                                        pojo.getResponse().getItems().get(i).getId(),
+                                                        setTitlePublic(pojo.getResponse().getItems().get(i).getOwnerId()),
+                                                        pojo.getResponse().getItems().get(i).getText(),
+                                                        pojo.getResponse().getItems().get(i).getAttachments().get(0).getPhoto().getSizes().get(3).getUrl(),
+                                                        pojo.getResponse().getItems().get(i).getLikes().getCount(),
+                                                        pojo.getResponse().getItems().get(i).getComments().getCount()
+                                                ));
+                                            }
+                                        }
+                                    }
+                                }
+                                else {
+                                    arrayPosts.add(new Post(
+                                            pojo.getResponse().getItems().get(i).getId(),
+                                            setTitlePublic(pojo.getResponse().getItems().get(i).getOwnerId()),
+                                            pojo.getResponse().getItems().get(i).getText(),
+                                            "",
+                                            pojo.getResponse().getItems().get(i).getLikes().getCount(),
+                                            pojo.getResponse().getItems().get(i).getComments().getCount()
+                                    ));
+                                }
                             }
                         }
 
@@ -121,13 +163,36 @@ public class RecViewPostPresenter extends MvpPresenter <RecViewPostsInterface> {
                             // в диапазоне текущего дня
                             if ((checkDate > SettingTime.getFirstUnixTime()) & (checkDate < SettingTime.getSecondUnixTime())) {
 
-                                arrayPosts.add(new Post(
-                                        pojo.getResponse().getItems().get(i).getId(),
-                                        setTitlePublic(pojo.getResponse().getItems().get(i).getOwnerId()),
-                                        pojo.getResponse().getItems().get(i).getText(),
-                                        pojo.getResponse().getItems().get(i).getLikes().getCount(),
-                                        pojo.getResponse().getItems().get(i).getComments().getCount()
-                                ));
+                                if (pojo.getResponse().getItems().get(i).getAttachments() != null){
+
+                                    if (pojo.getResponse().getItems().get(i).getAttachments().get(0).getPhoto() != null ){
+
+                                        if (pojo.getResponse().getItems().get(i).getAttachments().get(0).getPhoto().getSizes() != null){
+
+                                            if (pojo.getResponse().getItems().get(i).getAttachments().get(0).getPhoto().getSizes().get(3) != null){
+
+                                                arrayPosts.add(new Post(
+                                                        pojo.getResponse().getItems().get(i).getId(),
+                                                        setTitlePublic(pojo.getResponse().getItems().get(i).getOwnerId()),
+                                                        pojo.getResponse().getItems().get(i).getText(),
+                                                        pojo.getResponse().getItems().get(i).getAttachments().get(0).getPhoto().getSizes().get(3).getUrl(),
+                                                        pojo.getResponse().getItems().get(i).getLikes().getCount(),
+                                                        pojo.getResponse().getItems().get(i).getComments().getCount()
+                                                ));
+                                            }
+                                        }
+                                    }
+                                }
+                                else {
+                                    arrayPosts.add(new Post(
+                                            pojo.getResponse().getItems().get(i).getId(),
+                                            setTitlePublic(pojo.getResponse().getItems().get(i).getOwnerId()),
+                                            pojo.getResponse().getItems().get(i).getText(),
+                                            "",
+                                            pojo.getResponse().getItems().get(i).getLikes().getCount(),
+                                            pojo.getResponse().getItems().get(i).getComments().getCount()
+                                    ));
+                                }
                             }
                         }
 
@@ -166,13 +231,36 @@ public class RecViewPostPresenter extends MvpPresenter <RecViewPostsInterface> {
                             // в диапазоне текущего дня
                             if ((checkDate > SettingTime.getFirstUnixTime()) & (checkDate < SettingTime.getSecondUnixTime())) {
 
-                                arrayPosts.add(new Post(
-                                        pojo.getResponse().getItems().get(i).getId(),
-                                        setTitlePublic(pojo.getResponse().getItems().get(i).getOwnerId()),
-                                        pojo.getResponse().getItems().get(i).getText(),
-                                        pojo.getResponse().getItems().get(i).getLikes().getCount(),
-                                        pojo.getResponse().getItems().get(i).getComments().getCount()
-                                ));
+                                if (pojo.getResponse().getItems().get(i).getAttachments() != null){
+
+                                    if (pojo.getResponse().getItems().get(i).getAttachments().get(0).getPhoto() != null ){
+
+                                        if (pojo.getResponse().getItems().get(i).getAttachments().get(0).getPhoto().getSizes() != null){
+
+                                            if (pojo.getResponse().getItems().get(i).getAttachments().get(0).getPhoto().getSizes().get(3) != null){
+
+                                                arrayPosts.add(new Post(
+                                                        pojo.getResponse().getItems().get(i).getId(),
+                                                        setTitlePublic(pojo.getResponse().getItems().get(i).getOwnerId()),
+                                                        pojo.getResponse().getItems().get(i).getText(),
+                                                        pojo.getResponse().getItems().get(i).getAttachments().get(0).getPhoto().getSizes().get(3).getUrl(),
+                                                        pojo.getResponse().getItems().get(i).getLikes().getCount(),
+                                                        pojo.getResponse().getItems().get(i).getComments().getCount()
+                                                ));
+                                            }
+                                        }
+                                    }
+                                }
+                                else {
+                                    arrayPosts.add(new Post(
+                                            pojo.getResponse().getItems().get(i).getId(),
+                                            setTitlePublic(pojo.getResponse().getItems().get(i).getOwnerId()),
+                                            pojo.getResponse().getItems().get(i).getText(),
+                                            "",
+                                            pojo.getResponse().getItems().get(i).getLikes().getCount(),
+                                            pojo.getResponse().getItems().get(i).getComments().getCount()
+                                    ));
+                                }
                             }
                         }
 
@@ -211,13 +299,36 @@ public class RecViewPostPresenter extends MvpPresenter <RecViewPostsInterface> {
                             // в диапазоне текущего дня
                             if ((checkDate > SettingTime.getFirstUnixTime()) & (checkDate < SettingTime.getSecondUnixTime())) {
 
-                                arrayPosts.add(new Post(
-                                        pojo.getResponse().getItems().get(i).getId(),
-                                        setTitlePublic(pojo.getResponse().getItems().get(i).getOwnerId()),
-                                        pojo.getResponse().getItems().get(i).getText(),
-                                        pojo.getResponse().getItems().get(i).getLikes().getCount(),
-                                        pojo.getResponse().getItems().get(i).getComments().getCount()
-                                ));
+                                if (pojo.getResponse().getItems().get(i).getAttachments() != null){
+
+                                    if (pojo.getResponse().getItems().get(i).getAttachments().get(0).getPhoto() != null ){
+
+                                        if (pojo.getResponse().getItems().get(i).getAttachments().get(0).getPhoto().getSizes() != null){
+
+                                            if (pojo.getResponse().getItems().get(i).getAttachments().get(0).getPhoto().getSizes().get(3) != null){
+
+                                                arrayPosts.add(new Post(
+                                                        pojo.getResponse().getItems().get(i).getId(),
+                                                        setTitlePublic(pojo.getResponse().getItems().get(i).getOwnerId()),
+                                                        pojo.getResponse().getItems().get(i).getText(),
+                                                        pojo.getResponse().getItems().get(i).getAttachments().get(0).getPhoto().getSizes().get(3).getUrl(),
+                                                        pojo.getResponse().getItems().get(i).getLikes().getCount(),
+                                                        pojo.getResponse().getItems().get(i).getComments().getCount()
+                                                ));
+                                            }
+                                        }
+                                    }
+                                }
+                                else {
+                                    arrayPosts.add(new Post(
+                                            pojo.getResponse().getItems().get(i).getId(),
+                                            setTitlePublic(pojo.getResponse().getItems().get(i).getOwnerId()),
+                                            pojo.getResponse().getItems().get(i).getText(),
+                                            "",
+                                            pojo.getResponse().getItems().get(i).getLikes().getCount(),
+                                            pojo.getResponse().getItems().get(i).getComments().getCount()
+                                    ));
+                                }
                             }
                         }
 
@@ -236,7 +347,7 @@ public class RecViewPostPresenter extends MvpPresenter <RecViewPostsInterface> {
 
 
     // Жесть Архангельска №2
-    public void loadData5(){
+    private void loadData5(){
 
         Runnable runnable = () -> RetrofitBuilder.getInstance()
                 .getRESTMethods()
@@ -256,13 +367,36 @@ public class RecViewPostPresenter extends MvpPresenter <RecViewPostsInterface> {
                             // в диапазоне текущего дня
                             if ((checkDate > SettingTime.getFirstUnixTime()) & (checkDate < SettingTime.getSecondUnixTime())) {
 
-                                arrayPosts.add(new Post(
-                                        pojo.getResponse().getItems().get(i).getId(),
-                                        setTitlePublic(pojo.getResponse().getItems().get(i).getOwnerId()),
-                                        pojo.getResponse().getItems().get(i).getText(),
-                                        pojo.getResponse().getItems().get(i).getLikes().getCount(),
-                                        pojo.getResponse().getItems().get(i).getComments().getCount()
-                                ));
+                                if (pojo.getResponse().getItems().get(i).getAttachments() != null){
+
+                                    if (pojo.getResponse().getItems().get(i).getAttachments().get(0).getPhoto() != null ){
+
+                                        if (pojo.getResponse().getItems().get(i).getAttachments().get(0).getPhoto().getSizes() != null){
+
+                                            if (pojo.getResponse().getItems().get(i).getAttachments().get(0).getPhoto().getSizes().get(3) != null){
+
+                                                arrayPosts.add(new Post(
+                                                        pojo.getResponse().getItems().get(i).getId(),
+                                                        setTitlePublic(pojo.getResponse().getItems().get(i).getOwnerId()),
+                                                        pojo.getResponse().getItems().get(i).getText(),
+                                                        pojo.getResponse().getItems().get(i).getAttachments().get(0).getPhoto().getSizes().get(3).getUrl(),
+                                                        pojo.getResponse().getItems().get(i).getLikes().getCount(),
+                                                        pojo.getResponse().getItems().get(i).getComments().getCount()
+                                                ));
+                                            }
+                                        }
+                                    }
+                                }
+                                else {
+                                    arrayPosts.add(new Post(
+                                            pojo.getResponse().getItems().get(i).getId(),
+                                            setTitlePublic(pojo.getResponse().getItems().get(i).getOwnerId()),
+                                            pojo.getResponse().getItems().get(i).getText(),
+                                            "",
+                                            pojo.getResponse().getItems().get(i).getLikes().getCount(),
+                                            pojo.getResponse().getItems().get(i).getComments().getCount()
+                                    ));
+                                }
                             }
                         }
 
@@ -287,13 +421,13 @@ public class RecViewPostPresenter extends MvpPresenter <RecViewPostsInterface> {
 
 
 
-    public static ArrayList<Post> getArrayPosts() {
+    public ArrayList<Post> getArrayPosts() {
         return arrayPosts;
     }
 
 
     // вернуть заголовок паблика
-    public String setTitlePublic(int idPublic){
+    private String setTitlePublic(int idPublic){
 
         String title = "";
 
@@ -322,5 +456,6 @@ public class RecViewPostPresenter extends MvpPresenter <RecViewPostsInterface> {
 
         return title;
     }
+
 
 }

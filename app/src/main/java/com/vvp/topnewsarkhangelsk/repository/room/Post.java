@@ -9,23 +9,26 @@ import java.util.Comparator;
 public class Post implements Serializable {
 
 
-    int idPost;             // id поста
+    private int idPost;             // id поста
 
-    String titlePublic;     // заголовок паблика
+    private String titlePublic;     // заголовок паблика
 
-    String textPost;        // текст поста
+    private String textPost;        // текст поста
 
-    int quantityLikes;      // количество лайков
+    private String picture;         // картинка
 
-    int quantityComments;   // количество коментов
+    private int quantityLikes;      // количество лайков
+
+    private int quantityComments;   // количество коментов
 
 
 
     // конструктор
-    public Post(int idPost, String titlePublic, String textPost,  int quantityLikes, int quantityComments) {
+    public Post(int idPost, String titlePublic, String textPost, String picture, int quantityLikes, int quantityComments) {
         this.idPost = idPost;
         this.titlePublic = titlePublic;
         this.textPost = textPost;
+        this.picture = picture;
         this.quantityLikes = quantityLikes;
         this.quantityComments = quantityComments;
     }
@@ -51,9 +54,9 @@ public class Post implements Serializable {
         return quantityComments;
     }
 
-
-
-
+    public String getPicture() {
+        return picture;
+    }
 
     // для сортировки
     public static final Comparator <Post> sortByLikes = (post1, post2) -> post2.getQuantityLikes() - post1.getQuantityLikes();
